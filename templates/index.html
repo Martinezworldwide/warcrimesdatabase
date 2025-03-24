@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>War Crimes Database</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-box {
+            margin-bottom: 30px;
+        }
+        .organization-card {
+            transition: transform 0.2s;
+        }
+        .organization-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">War Crimes Database</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-view="organizations">Organizations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-view="incidents">Incidents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-view="documents">Documents</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="search-box">
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search organizations, incidents, or documents...">
+                <button class="btn btn-primary" type="button" id="searchButton">Search</button>
+            </div>
+        </div>
+
+        <div id="organizationsView" class="view active">
+            <h2>Organizations</h2>
+            <div class="row" id="organizationsList">
+                <!-- Organizations will be loaded here -->
+            </div>
+        </div>
+
+        <div id="incidentsView" class="view d-none">
+            <h2>Incidents</h2>
+            <div class="row" id="incidentsList">
+                <!-- Incidents will be loaded here -->
+            </div>
+        </div>
+
+        <div id="documentsView" class="view d-none">
+            <h2>Documents</h2>
+            <div class="row" id="documentsList">
+                <!-- Documents will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load organizations on page load
+            loadOrganizations();
+
+            // Navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const view = this.dataset.view;
+                    showView(view);
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchButton').addEventListener('click', function() {
+                const searchTerm = document.getElementById('searchInput').value;
+                searchDatabase(searchTerm);
+            });
+        });
+
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.add('d-none');
+            });
+            document.getElementById(`${viewName}View`).classList.remove('d-none');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+        }
+
+        async function loadOrganizations() {
+            try {
+                const response = await fetch('/api/organizations');
+                const organizations = await response.json();
+                
+                const organizationsList = document.getElementById('organizationsList');
+                organizationsList.innerHTML = organizations.map(org => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card organization-card">
+                            <div class="card-body">
+                                <h5 class="card-title">${org.name}</h5>
+                                <p class="card-text">${org.description || 'No description available'}</p>
+                                <ul class="list-unstyled">
+                                    ${org.address ? `<li><i class="bi bi-geo-alt"></i> ${org.address}</li>` : ''}
+                                    ${org.website ? `<li><i class="bi bi-link-45deg"></i> <a href="${org.website}" target="_blank">Website</a></li>` : ''}
+                                    ${org.founder ? `<li><i class="bi bi-person"></i> Founder: ${org.founder}</li>` : ''}
+                                    ${org.headquarters ? `<li><i class="bi bi-building"></i> HQ: ${org.headquarters}</li>` : ''}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading organizations:', error);
+            }
+        }
+
+        async function searchDatabase(term) {
+            // Implement search functionality
+            console.log('Searching for:', term);
+        }
+    </script>
+</body>
+</html> 
